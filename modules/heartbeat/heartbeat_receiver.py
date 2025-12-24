@@ -47,15 +47,13 @@ class HeartbeatReceiver:
         self.__missed_heartbeats = 0
         self.__disconnect_threshold = 5
 
-    def run(
-        self
-    ) -> "tuple[bool, str]":
+    def run(self) -> "tuple[bool, str]":
         """
         Attempt to recieve a heartbeat message.
         If disconnected for over a threshold number of periods,
         the connection is considered disconnected.
         """
-        msg = self.__connection.recv_match(type = "HEARTBEAT", blocking = True, timeout = 1)
+        msg = self.__connection.recv_match(type="HEARTBEAT", blocking=True, timeout=1)
 
         if msg is not None:
             self.__logger.debug("Heartbeat Received", True)
@@ -67,7 +65,7 @@ class HeartbeatReceiver:
                 self.__logger.info("Connected to Drone", True)
         else:
             self.__missed_heartbeats += 1
-            self.__logger.warning(f"Missed Heartbeat ({self.__missed_heartbeats})", True )
+            self.__logger.warning(f"Missed Heartbeat ({self.__missed_heartbeats})", True)
 
             if self.__missed_heartbeats >= self.__disconnect_threshold:
                 if self.__is_connected:
@@ -75,7 +73,7 @@ class HeartbeatReceiver:
                     self.__logger.error("Disconnected from Drone", True)
 
         if self.__is_connected:
-            status  = "Connected"
+            status = "Connected"
         else:
             status = "Disconnected"
 

@@ -59,7 +59,9 @@ def command_worker(
     # =============================================================================================
     # Instantiate class object (command.Command)
 
-    result, cmd = command.Command.create(connection, target, height_tolerance, z_speed, angle_tolerance, turning_speed, local_logger)
+    result, cmd = command.Command.create(
+        connection, target, height_tolerance, z_speed, angle_tolerance, turning_speed, local_logger
+    )
 
     if not result:
         local_logger.error("Failed to create command", True)
@@ -84,6 +86,7 @@ def command_worker(
         local_logger.debug(f"Command status: {status}", True)
 
     local_logger.info("Command worker exiting", True)
+
 
 # =================================================================================================
 #                            ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

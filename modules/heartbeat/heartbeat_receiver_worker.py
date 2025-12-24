@@ -18,7 +18,8 @@ from ..common.modules.logger import logger
 # =================================================================================================
 def heartbeat_receiver_worker(
     connection: mavutil.mavfile,
-    output_queue: queue_proxy_wrapper.QueueProxyWrapper, controller: worker_controller.WorkerController,
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController,
 ) -> None:
     """
     Worker process.
@@ -53,7 +54,6 @@ def heartbeat_receiver_worker(
         local_logger.error("Failed to create Heartbeat Receiver", True)
         return
 
-
     assert receiver is not None
 
     while not controller.is_exit_requested():
@@ -68,6 +68,7 @@ def heartbeat_receiver_worker(
         local_logger.debug(f"Status: {status}", True)
 
     local_logger.info("Heartbeat receiver worker exiting", True)
+
 
 # =================================================================================================
 #                            ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

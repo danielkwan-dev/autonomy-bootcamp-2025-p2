@@ -112,7 +112,7 @@ class Telemetry:
         start_time = time.time()
         timeout = 1.0
 
-        while (attitude_msg is None or position_msg is None):
+        while attitude_msg is None or position_msg is None:
             if time.time() - start_time > timeout:
                 self.__logger.error("Timeout waiting for telemtry messages", True)
                 return False, None
@@ -122,7 +122,9 @@ class Telemetry:
                 break
 
             if attitude_msg is None:
-                attitude_msg = self.__connection.recv_match(type = "ATTITUDE", blocking = True, timeout = remaining_time )
+                attitude_msg = self.__connection.recv_match(
+                    type="ATTITUDE", blocking=True, timeout=remaining_time
+                )
 
                 if attitude_msg is not None:
                     self.__logger.debug("Received ATTITUDE message", True)
@@ -131,7 +133,9 @@ class Telemetry:
                 remaining_time = timeout - (time.time() - start_time)
 
                 if remaining_time > 0:
-                    position_msg = self.__connection.recv_match(type = "LOCAL_POSITION_NED", blocking = True, timeout = remaining_time)
+                    position_msg = self.__connection.recv_match(
+                        type="LOCAL_POSITION_NED", blocking=True, timeout=remaining_time
+                    )
 
                     if position_msg is not None:
                         self.__logger.debug("Received LOCAL_POSITION_NED message", True)
@@ -142,10 +146,9 @@ class Telemetry:
 
         time_since_boot = max(attitude_msg.time_boot_ms, position_msg.time_boot_ms)
 
-
         telemetry_data = TelemetryData(
-            time_since_boot = time_since_boot,
-            x = position_msg.x,
+            time_since_boot=time_since_boot,
+            x=position_msg.x,
             y=position_msg.y,
             z=position_msg.z,
             x_velocity=position_msg.vx,
@@ -162,6 +165,7 @@ class Telemetry:
         self.__logger.debug(f"Telemetry Data: {telemetry_data}", True)
 
         return True, telemetry_data
+
 
 # =================================================================================================
 #                            ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

@@ -51,7 +51,14 @@ class Command:  # pylint: disable=too-many-instance-attributes
             return False, None
 
         return True, Command(
-            cls.__private_key, connection, target, height_tolerance, z_speed, angle_tolerance, turning_speed, local_logger
+            cls.__private_key,
+            connection,
+            target,
+            height_tolerance,
+            z_speed,
+            angle_tolerance,
+            turning_speed,
+            local_logger,
         )
 
     def __init__(
@@ -87,12 +94,16 @@ class Command:  # pylint: disable=too-many-instance-attributes
         """
         # Log average velocity for this trip so far
 
-        current_velocity = math.sqrt(telemetry_data.x_velocity**2 + telemetry_data.y_velocity**2 + telemetry_data.z_velocity**2)
+        current_velocity = math.sqrt(
+            telemetry_data.x_velocity**2
+            + telemetry_data.y_velocity**2
+            + telemetry_data.z_velocity**2
+        )
 
         self.__velocity_samples.append(current_velocity)
         average_velocity = sum(self.__velocity_samples) / len(self.__velocity_samples)
 
-        self.__logger.info(f"Average velocity: {average_velocity} m/s", True )
+        self.__logger.info(f"Average velocity: {average_velocity} m/s", True)
 
         # Use COMMAND_LONG (76) message, assume the target_system=1 and target_componenet=0
         # The appropriate commands to use are instructed below
@@ -100,12 +111,21 @@ class Command:  # pylint: disable=too-many-instance-attributes
         # Adjust height using the comand MAV_CMD_CONDITION_CHANGE_ALT (113)
         # String to return to main: "CHANGE_ALTITUDE: {amount you changed it by, delta height in meters}"
 
-
         altitude_delta = self.__target.z - telemetry_data.z
 
         if abs(altitude_delta) > self.__height_tolerance:
             self.__connection.mav.command_long_send(
-                1, 0, mavutil.mavlink.MAV_CMD_CONDITION_CHANGE_ALT, 0, self.__z_speed, 0, 0, 0, 0, 0, self.__target.z
+                1,
+                0,
+                mavutil.mavlink.MAV_CMD_CONDITION_CHANGE_ALT,
+                0,
+                self.__z_speed,
+                0,
+                0,
+                0,
+                0,
+                0,
+                self.__target.z,
             )
 
             self.__logger.debug(f"Changing altitude by {altitude_delta}m", True)
@@ -135,14 +155,23 @@ class Command:  # pylint: disable=too-many-instance-attributes
 
         if abs(angle_delta_deg) > self.__angle_tolerance:
             self.__connection.mav.command_long_send(
-                1, 0, mavutil.mavlink.MAV_CMD_CONDITION_YAW, 0, angle_delta_deg, self.__turning_speed, direction, 1, 0, 0, 0
+                1,
+                0,
+                mavutil.mavlink.MAV_CMD_CONDITION_YAW,
+                0,
+                angle_delta_deg,
+                self.__turning_speed,
+                direction,
+                1,
+                0,
+                0,
+                0,
             )
             self.__logger.debug(f"Changing yaw by {angle_delta_deg} degrees", True)
             return True, f"CHANGING_YAW: {angle_delta_deg}"
 
         self.__logger.debug("On target", True)
         return True, "ON_TARGET"
-
 
 
 # =================================================================================================

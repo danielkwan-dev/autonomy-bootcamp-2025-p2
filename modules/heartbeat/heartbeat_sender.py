@@ -1,6 +1,7 @@
 """
 Heartbeat sending logic.
 """
+
 from pymavlink import mavutil
 
 from modules.common.modules.logger import logger
@@ -45,9 +46,7 @@ class HeartbeatSender:
         self.__connection = connection
         self.__logger = local_logger
 
-    def run(
-        self
-    ) -> bool:
+    def run(self) -> bool:
         """
         Attempt to send a heartbeat message.
         """

@@ -98,9 +98,7 @@ def main() -> int:
     # Just set a timer to stop the worker after a while, since the worker infinite loops
     threading.Timer(HEARTBEAT_PERIOD * NUM_TRIALS, stop, (controller,)).start()
 
-    heartbeat_sender_worker.heartbeat_sender_worker(
-        connection, controller
-    )
+    heartbeat_sender_worker.heartbeat_sender_worker(connection, controller)
     # =============================================================================================
     #                          ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
     # =============================================================================================

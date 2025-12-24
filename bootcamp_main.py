@@ -92,20 +92,22 @@ def main() -> int:
     mp_manager = mp.Manager()
 
     # Create queues
-    heartbeat_receiver_output_queue = queue_proxy_wrapper.QueueProxyWrapper(mp_manager, QUEUE_MAX_SIZE)
+    heartbeat_receiver_output_queue = queue_proxy_wrapper.QueueProxyWrapper(
+        mp_manager, QUEUE_MAX_SIZE
+    )
     telemetry_output_queue = queue_proxy_wrapper.QueueProxyWrapper(mp_manager, QUEUE_MAX_SIZE)
     command_output_queue = queue_proxy_wrapper.QueueProxyWrapper(mp_manager, QUEUE_MAX_SIZE)
 
     # Create worker properties for each worker type (what inputs it takes, how many workers)
     # Heartbeat sender
     result, heartbeat_sender_properties = worker_manager.WorkerProperties.create(
-        count = HEARTBEAT_SENDER_WORKER_COUNT,
-        target = heartbeat_sender_worker.heartbeat_sender_worker,
+        count=HEARTBEAT_SENDER_WORKER_COUNT,
+        target=heartbeat_sender_worker.heartbeat_sender_worker,
         work_arguments=(connection,),
-        input_queues = [],
-        output_queues = [],
-        controller = controller,
-        local_logger = main_logger,
+        input_queues=[],
+        output_queues=[],
+        controller=controller,
+        local_logger=main_logger,
     )
 
     if not result:
@@ -115,13 +117,13 @@ def main() -> int:
     assert heartbeat_sender_properties is not None
     # Heartbeat receiver
     result, heartbeat_receiver_properties = worker_manager.WorkerProperties.create(
-        count = HEARTBEAT_RECEIVER_WORKER_COUNT,
-        target = heartbeat_receiver_worker.heartbeat_receiver_worker,
-        work_arguments = (connection,),
-        input_queues = [],
-        output_queues =[heartbeat_receiver_output_queue],
-        controller = controller,
-        local_logger = main_logger,
+        count=HEARTBEAT_RECEIVER_WORKER_COUNT,
+        target=heartbeat_receiver_worker.heartbeat_receiver_worker,
+        work_arguments=(connection,),
+        input_queues=[],
+        output_queues=[heartbeat_receiver_output_queue],
+        controller=controller,
+        local_logger=main_logger,
     )
 
     if not result:
@@ -131,13 +133,13 @@ def main() -> int:
     assert heartbeat_receiver_properties is not None
     # Telemetry
     result, telemetry_properties = worker_manager.WorkerProperties.create(
-        count = TELEMETRY_WORKER_COUNT,
-        target = telemetry_worker.telemetry_worker,
-        work_arguments = (connection,),
-        input_queues = [],
-        output_queues = [telemetry_output_queue],
-        controller = controller,
-        local_logger = main_logger,
+        count=TELEMETRY_WORKER_COUNT,
+        target=telemetry_worker.telemetry_worker,
+        work_arguments=(connection,),
+        input_queues=[],
+        output_queues=[telemetry_output_queue],
+        controller=controller,
+        local_logger=main_logger,
     )
     if not result:
         print("Failed to create arguments for Telemetry")
@@ -147,13 +149,20 @@ def main() -> int:
 
     # Command
     result, command_properties = worker_manager.WorkerProperties.create(
-        count = COMMAND_WORKER_COUNT,
-        target = command_worker.command_worker,
-        work_arguments = (connection, TARGET, HEIGHT_TOLERANCE, Z_SPEED, ANGLE_TOLERANCE, TURNING_SPEED,),
-        input_queues = [telemetry_output_queue],
-        output_queues = [command_output_queue],
-        controller = controller,
-        local_logger = main_logger,
+        count=COMMAND_WORKER_COUNT,
+        target=command_worker.command_worker,
+        work_arguments=(
+            connection,
+            TARGET,
+            HEIGHT_TOLERANCE,
+            Z_SPEED,
+            ANGLE_TOLERANCE,
+            TURNING_SPEED,
+        ),
+        input_queues=[telemetry_output_queue],
+        output_queues=[command_output_queue],
+        controller=controller,
+        local_logger=main_logger,
     )
 
     if not result:
@@ -163,7 +172,10 @@ def main() -> int:
     assert command_properties is not None
 
     # Create the workers (processes) and obtain their managers
-    result, heartbeat_sender_manager = worker_manager.WorkerManager.create(worker_properties = heartbeat_sender_properties, local_logger = main_logger,)
+    result, heartbeat_sender_manager = worker_manager.WorkerManager.create(
+        worker_properties=heartbeat_sender_properties,
+        local_logger=main_logger,
+    )
 
     if not result:
         print("Failed to create manger for Heartbeat sender")
@@ -171,7 +183,10 @@ def main() -> int:
 
     assert heartbeat_sender_manager is not None
 
-    result, heartbeat_receiver_manager = worker_manager.WorkerManager.create(worker_properties = heartbeat_receiver_properties, local_logger = main_logger,)
+    result, heartbeat_receiver_manager = worker_manager.WorkerManager.create(
+        worker_properties=heartbeat_receiver_properties,
+        local_logger=main_logger,
+    )
 
     if not result:
         print("Failed to create manger for Heartbeat receiver")
@@ -179,7 +194,10 @@ def main() -> int:
 
     assert heartbeat_receiver_manager is not None
 
-    result, telemetry_manager = worker_manager.WorkerManager.create(worker_properties = telemetry_properties, local_logger = main_logger,)
+    result, telemetry_manager = worker_manager.WorkerManager.create(
+        worker_properties=telemetry_properties,
+        local_logger=main_logger,
+    )
 
     if not result:
         print("Failed to create manger for Telemetry")
@@ -187,7 +205,10 @@ def main() -> int:
 
     assert telemetry_manager is not None
 
-    result, command_manager = worker_manager.WorkerManager.create(worker_properties = command_properties, local_logger = main_logger,)
+    result, command_manager = worker_manager.WorkerManager.create(
+        worker_properties=command_properties,
+        local_logger=main_logger,
+    )
 
     if not result:
         print("Failed to create manger for Command")
@@ -219,7 +240,7 @@ def main() -> int:
             pass
 
         try:
-            command_status = command_output_queue.queue.get(timeout = 0.1)
+            command_status = command_output_queue.queue.get(timeout=0.1)
             main_logger.info(f"Command: {command_status}")
         except queue.Empty:
             pass
