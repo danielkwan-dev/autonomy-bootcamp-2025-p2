@@ -1,7 +1,7 @@
 # Initialize the project for Windows
 
 # Activate venv to prevent accidentally installing into global space
-./venv/Scripts/Activate.ps1
+.\venv\Scripts\Activate.ps1
 
 if($?) {
     # If successfully activated venv
@@ -14,7 +14,7 @@ if($?) {
     git submodule foreach --recursive "pip install -r requirements.txt"
 
     ""
-    "Seutp complete!"
+    "Setup complete!"
 } else {
     "Please install a virtual environment in the directory 'venv', at the project root directory"
 }

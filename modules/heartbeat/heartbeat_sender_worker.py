@@ -18,13 +18,14 @@ from ..common.modules.logger import logger
 # =================================================================================================
 def heartbeat_sender_worker(
     connection: mavutil.mavfile,
-    args,  # Place your own arguments here
+    controller: worker_controller.WorkerController,  # Place your own arguments here
     # Add other necessary worker arguments here
 ) -> None:
     """
     Worker process.
 
-    args... describe what the arguments are
+    connection is the MAVLink connection to the drone.
+    controller is how the main process communicates to this worker process.
     """
     # =============================================================================================
     #                          ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -38,8 +39,15 @@ def heartbeat_sender_worker(
         print("ERROR: Worker failed to create logger")
         return
 
+    # Instantiate class object (heartbeat_sender.HeartbeatSender)
+    result, sender = heartbeat_sender.HeartbeatSender.create(connection, local_logger)
+    if not result:
+        local_logger.error("Failed to create HeartbeatSender", True)
+        return
+
     # Get Pylance to stop complaining
     assert local_logger is not None
+    assert sender is not None
 
     local_logger.info("Logger initialized", True)
 
@@ -49,7 +57,16 @@ def heartbeat_sender_worker(
     # Instantiate class object (heartbeat_sender.HeartbeatSender)
 
     # Main loop: do work.
+    while not controller.is_exit_requested():
+        controller.check_pause()
 
+        result = sender.run()
+        if not result:
+            local_logger.error("Failed to send heartbeat", True)
+
+        time.sleep(1)
+
+    local_logger.info("Heartbeat sender worker exiting", True)
 
 # =================================================================================================
 #                            ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

@@ -18,13 +18,15 @@ from ..common.modules.logger import logger
 # =================================================================================================
 def telemetry_worker(
     connection: mavutil.mavfile,
-    args,  # Place your own arguments here
-    # Add other necessary worker arguments here
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController
 ) -> None:
     """
     Worker process.
 
-    args... describe what the arguments are
+    connection is the MAVLink connection to the drone
+    output_queue is where we send the telemetry data
+    controller is how the main process communicates to this worker process
     """
     # =============================================================================================
     #                          ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -48,7 +50,27 @@ def telemetry_worker(
     # =============================================================================================
     # Instantiate class object (telemetry.Telemetry)
 
-    # Main loop: do work.
+    result, telem = telemetry.Telemetry.create(connection, local_logger)
+
+    if not result:
+        local_logger.error("Failed to create Telemetry", True)
+        return
+
+    assert telem is not None
+
+    while not controller.is_exit_requested():
+        controller.check_pause()
+
+        result, telemetry_data = telem.run()
+
+        if not result:
+            local_logger.error("Failed to get telemetry data", True)
+            continue
+
+        output_queue.queue.put(telemetry_data)
+        local_logger.debug("Sent telemetry data to queue", True)
+
+    local_logger.info("Telemetry worker exiting", True)
 
 
 # =================================================================================================
